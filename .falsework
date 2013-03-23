@@ -1,0 +1,9 @@
+# DO NOT DELETE THIS FILE
+# unless you don't want to upgrade scaffolds in the future.
+---
+project:
+  classy: dereferrer
+  upgraded: '2013-03-23T06:58:30+02:00'
+template:
+  version: 1.0.0
+  name: coffee-chrome

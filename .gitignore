@@ -1,0 +1,8 @@
+lib
+manifest.json
+.ph
+node_modules
+npm-debug.log
+*.zip
+*.crx
+private.pem
