@@ -14,9 +14,11 @@
 		"url": "http://github.com/gromnitsky/dereferrer"
 	},
 	"dependencies": {
-		"coffeeify": "~0.3.0",
 		"coffee-script": "~1.6.2",
+		"mocha": "~1.8.2",
+		"underscore": "~1.4.4",
+		"backbone": "~1.0.0",
 		"browserify": "~2.6.0",
-		"mocha": "~1.8.2"
+		"jquery-browserify": "~1.8.1"
 	}
 }
