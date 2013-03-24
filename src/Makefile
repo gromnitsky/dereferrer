@@ -1,7 +1,11 @@
 BROWSERIFY := ../node_modules/.bin/browserify
+COFFEE := ../node_modules/.bin/coffee
 
 out := ../lib
-out_coffee := $(patsubst %.coffee,$(out)/%.js,$(wildcard *.coffee))
+out_js := $(patsubst %.coffee,$(out)/%.js,$(wildcard *.coffee))
+temp_js := $(patsubst %.coffee,%.js,$(wildcard *.coffee))
+html := $(wildcard *.html)
+out_html := $(patsubst %.html,$(out)/%.html,$(wildcard *.html))
 
 .PHONY: compile clean
 
@@ -9,12 +13,17 @@ all: compile
 
 $(out)/%.js: %.coffee
 	@mkdir -p `dirname $@`
-	$(BROWSERIFY) -t coffeeify $< -o $@
+	$(COFFEE) -c -o . $<
+	$(BROWSERIFY) $(basename $<).js -o $@
+	@rm $(basename $<).js
 
-compile: $(out_coffee)
+$(out)/%.html: %.html
+	cp $< $@
+
+compile: $(out_js) $(out_html)
 
 clean:
-	rm -f $(out_coffee)
+	rm -f $(out_js) $(temp_js) $(out_html)
 
 # Debug. Use 'gmake p-obj' to print $(obj) variable.
 p-%:
