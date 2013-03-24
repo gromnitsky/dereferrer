@@ -6,5 +6,9 @@
 
 	"background": {
 		"scripts": ["lib/background.js"]
-	}
+	},
+	"options_page": "lib/options.html",
+	"permissions": [
+		"storage"
+	]
 }

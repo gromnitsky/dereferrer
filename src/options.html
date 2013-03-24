@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>dereferrer options</title>
+	<script src="options.js"></script>
+	<style type="text/css">
+/*	  table {
+      border-collapse: collapse
+      }
+      th, td {
+      border: 1px solid black;
+      padding: 3px;
+      }*/
+	  #refrefs-controls {
+	  margin-top: 25px;
+	  }
+	</style>
+  </head>
+
+  <body>
+
+	<div id='list'>
+	  <!-- <h2>Yo!</h2> -->
+	  <table>
+		<tbody id='refrefs'>
+		  <tr>
+			<th></th>
+			<th>Domain</th>
+			<th>Referrer</th>
+          </tr>
+		</tbody>
+	  </table>
+	  <div id='refrefs-controls'>
+		<button id='refrefs-add'>Add</button>
+		<button id='refrefs-add'>Save</button>
+		<button id='refrefs-reset' title="To extension's defaults">Reset</button>
+		<button id='refrefs-clean' title='All entries'>Clean</button>
+	  </div>
+	</div>
+
+	<div id='help'>
+	  <p>
+		If a domain match was successful, an icon in a corresponding
+		tab's omnibox will appear later on.
+	  </p>
+	  <p>
+		<i>Hint:</i> some pay-walls (ft.com) also track number of visits
+		via cookies. Disable them for such cases.
+	  </p>
+	</div>
+
+  </body>
+</html>
