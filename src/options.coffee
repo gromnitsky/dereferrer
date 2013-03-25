@@ -1,6 +1,6 @@
 root = exports ? this
 
-$ = require 'jquery-browserify'
+$ = require '../vendor/zepto.shim'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
