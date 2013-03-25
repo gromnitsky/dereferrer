@@ -4,6 +4,13 @@ $ = require '../vendor/zepto.shim'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
+root.VERBOSE = 1
+
+puts = (level, who) ->
+    arguments[2] = "#{who}: #{arguments[2]}" if arguments?.length > 2 && who != ""
+    msg = (val for val, idx in arguments when idx > 1)
+    console.log.apply(console, msg) if level <= root.VERBOSE
+
 class root.Doma
     constructor: (@raw) ->
         throw new Error 'input string is empty' unless @raw?.match /^\S{3,}$/
@@ -30,7 +37,7 @@ isValidReferer = (referer) ->
 
 root.Refref = Backbone.Model.extend {
     sync: (method, model) ->
-        console.log "SYNC: #{model.cid}: #{method}: #{JSON.stringify model}"
+        puts 1, 'SYNC', '%s: %s: %s', model.cid, method, (JSON.stringify model)
         switch method
             when 'create' then model.id = model.cid
 #            when 'delete' then model.id = null
@@ -59,6 +66,7 @@ root.RefrefView = Backbone.View.extend {
         '#' + @model.cid
 
     initialize: ->
+        @model.view = this
         @listenTo(@model, 'change', @render)
 
     template: _.template "<td class='refref-destroy'>x</td>
@@ -72,7 +80,7 @@ root.RefrefView = Backbone.View.extend {
 
     # save changes in model from a gui element
     gui2model: (attr, event) ->
-        console.log "view dom change: #{@model.cid}"
+        puts 1, 'view dom change', @model.cid
         obj = {}
         obj[attr] = event.target.value
         if !@model.set obj, {validate: true}
@@ -85,7 +93,7 @@ root.RefrefView = Backbone.View.extend {
         'change .refref-referer-edit': (event) ->
             @gui2model 'referer', event
         'click .refref-destroy': (event) ->
-            console.log "view destroy: #{@model.cid}: isNew=#{@model.isNew()}"
+            puts 1, 'view destroy', "#{@model.cid}: isNew=#{@model.isNew()}"
             @model.destroy()
     }
 }
@@ -94,13 +102,12 @@ $ ->
     r1 = new root.Refref { domain: 'wsj.com', referer: 'news.google.com' }
     r1_view = new root.RefrefView { model: r1 }
     r1_view.render()
-    r1.myview = r1_view
     r1.on 'change', ->
-        console.log "change: #{@cid}"
+        puts 1, 'change',@cid
         @.save()
     r1.on 'destroy', ->
-        console.log "destroy: #{@cid}"
-        @myview.remove()
+        puts 1, 'destroy',@cid
+        @view.remove()
 
     r2 = new root.Refref { domain: 'ft.com', referer: 'news.google.com' }
     r2_view = new root.RefrefView { model: r2 }
