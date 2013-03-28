@@ -32,8 +32,9 @@ class root.Doma
 root.Refref = Backbone.Model.extend {
   toStorageFormat: ->
     obj = {}
-    obj[@get('domain')] = {}
-    obj[@get('domain')].referer = @get('referer')
+    obj[@get('domain')] =
+      referer: @get('referer')
+      id: @get('id')
     obj
 
   # Return promise
