@@ -139,7 +139,7 @@ root.RefrefView = Backbone.View.extend {
   # can't use _.template() due to chrome policy that is too long to
   # describe here. TODO: find a nice templating library
   template: ->
-    "<td class='refref-destroy'>x</td>
+    "<td class='refref-destroy'>&empty;</td>
 <td class='refref-domain-edit'><input value='#{@model.get('domain')}'></td>
 <td class='refref-referer-edit'><input value='#{@model.get('referer')}'></td>"
 
