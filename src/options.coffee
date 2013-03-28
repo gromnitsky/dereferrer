@@ -4,6 +4,7 @@ root = exports ? this
 $ = require '../vendor/zepto.shim'
 _ = require 'underscore'
 Backbone = require 'backbone'
+
 ChromeStorage = require './chrome_storage'
 storage = new ChromeStorage()
 
@@ -28,17 +29,6 @@ class root.Doma
   toString: ->
     @raw
 
-isValidDomain = (domain) ->
-  try
-    new root.Doma domain
-  catch e
-    return false
-  true
-
-isValidReferer = (referer) ->
-  return false unless referer?.match /^\S{3,}$/
-  true
-
 root.Refref = Backbone.Model.extend {
   toStorageFormat: ->
     obj = {}
@@ -50,6 +40,7 @@ root.Refref = Backbone.Model.extend {
   sync: (method, model) ->
     data = model.toStorageFormat()
     puts 1, 'SYNC', '%s: %s: %s', model.cid, method, (JSON.stringify data)
+
     switch method
       when 'create', 'update'
         # remove previous, then update
@@ -59,7 +50,7 @@ root.Refref = Backbone.Model.extend {
         .then ->
           storage.set(data)
         .then ->
-          model.id = model.cid
+          model.id = model.cid # TODO: make uuid
           puts 1, 'SYNC', '%s: %s: ok', model.cid, method
         , (e) ->
           puts 0, 'SYNC', '%s: %s: FAIL: %s', model.cid, method, e.message
@@ -73,8 +64,8 @@ root.Refref = Backbone.Model.extend {
           puts 0, 'SYNC', '%s: %s: FAIL: %s', model.cid, method, e.message
 
   validate: (attrs, options) ->
-    return "domain is invalid" unless isValidDomain attrs.domain
-    return "referer is invalid" unless isValidReferer attrs.referer
+    return "domain is invalid" unless root.Refref.isValidDomain attrs.domain
+    return "referer is invalid" unless root.Refref.isValidReferer attrs.referer
     undefined
 
   initialize: ->
@@ -86,6 +77,41 @@ root.Refref = Backbone.Model.extend {
         puts 1, 'destroy', @cid
         @view.remove()
     }
+}, {
+  # Model Class methods
+
+  isValidDomain: (domain) ->
+    try
+      new root.Doma domain
+    catch e
+      return false
+    true
+
+  isValidReferer: (referer) ->
+    return false unless referer?.match /^\S{3,}$/
+    true
+
+  storage2arr: (raw_data) ->
+    console.log raw_data if root.VERBOSE
+    ((val.domain = key; val) for key,val of raw_data)
+
+  # Fill google storage area with predefined options for several sites.
+  # Warning: clears every other data in the storage.
+  #
+  # Return a promise.
+  setDefaults: ->
+    puts 1, 'storage', 'cleaning & refilling'
+    everybody_wants_this =
+      'wsj.com':
+        referer: 'http://news.google.com'
+        id: 1
+      'ft.com':
+        referer: 'http://news.google.com'
+        id: 2
+
+    storage.clean()
+    .then ->
+      storage.set everybody_wants_this
 }
 
 domFlash = (element, funcall) ->
@@ -105,6 +131,7 @@ root.RefrefView = Backbone.View.extend {
     '#' + @model.cid
 
   initialize: ->
+    throw new Error 'no model specified' unless @model
     @model.view = this
     @listenTo(@model, 'change', @render)
 
@@ -140,41 +167,36 @@ root.RefrefView = Backbone.View.extend {
   }
 }
 
-# Fill google storage area with predefined options for several sites.
-# Warning: clears every other data in the storage.
-#
-# Return a promise
-setDefaults = ->
-  puts 1, 'storage', 'cleaning & refilling'
-  everybody_wants_this =
-    'wsj.com':
-      referer: 'http://news.google.com'
-    'ft.com':
-      referer: 'http://news.google.com'
+root.Refrefs = Backbone.Collection.extend {
+  model: root.Refref
+}
 
-  storage.clean()
-  .then ->
-    storage.set everybody_wants_this
+root.RefrefsView = Backbone.View.extend {
+  initialize: ->
+    throw new Error 'no collection specified' unless @collection
+    @listenTo(@collection, 'reset', @render)
 
+  render: ->
+    @collection.each (idx) ->
+      mview = new root.RefrefView { model: idx }
+      mview.render()
+}
 
 # main
 $ ->
   storage.getSize()
   .then (bytes) ->
-    setDefaults() if bytes == 0
+    root.Refref.setDefaults() if bytes == 0
   .then ->
     puts 1, 'storage', 'reading'
     storage.get()
   .then (result) ->
-    console.log result if root.VERBOSE
+    # get an array of jsonified models
+    model_data = root.Refref.storage2arr(result)
 
-    r1 = new root.Refref { domain: 'wsj.com', referer: 'news.google.com' }
-    r1_view = new root.RefrefView { model: r1 }
-    r1_view.render()
-
-    r2 = new root.Refref { domain: 'ft.com', referer: 'news.google.com' }
-    r2_view = new root.RefrefView { model: r2 }
-    r2_view.render()
-
-    r1.set {referer: 'http://news.google.com!!!'}
+    # create a collection, collection-view and call collection.reset()
+    refrefs = new root.Refrefs()
+    refrefs_table = new root.RefrefsView({collection: refrefs})
+    refrefs_table.render()
+    refrefs.reset model_data
   .done()
