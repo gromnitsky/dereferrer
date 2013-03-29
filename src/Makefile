@@ -15,13 +15,13 @@ temp_js := $(patsubst %.coffee,%.js,$(wildcard *.coffee))
 
 all: compile
 
-background.coffee: chrome_storage.coffee
-options.coffee: chrome_storage.coffee
+$(out)/background.js: chrome_storage.js
+$(out)/options.js: chrome_storage.js domainzone.js funcbug.js
 
 %.js: %.coffee
 	$(COFFEE) -c $<
 
-$(out)/%.js: %.coffee
+$(out)/%.js: %.js
 	@mkdir -p `dirname $@`
 	$(BROWSERIFY) $(basename $<).js -o $@
 
