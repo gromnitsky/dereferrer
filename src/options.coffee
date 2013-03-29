@@ -16,6 +16,16 @@ puts = (level, who) ->
   msg = (val for val, idx in arguments when idx > 1)
   console.log.apply(console, msg) if level <= root.VERBOSE
 
+uuid = ->
+  buf = new Uint16Array(8)
+  window.crypto.getRandomValues buf
+  S4 = (num) ->
+    ret = num.toString(16);
+    ret = "0"+ret while (ret.length < 4)
+    ret
+
+  (S4(buf[0])+S4(buf[1])+"-"+S4(buf[2])+"-4"+S4(buf[3]).substring(1)+"-y"+S4(buf[4]).substring(1)+"-"+S4(buf[5])+S4(buf[6])+S4(buf[7]))
+
 class root.Doma
   constructor: (@raw) ->
     throw new Error 'input string is empty' unless @raw?.match /^\S{3,}$/
@@ -29,6 +39,26 @@ class root.Doma
   toString: ->
     @raw
 
+# Backbone model:
+#
+# { 'domain' : 'example.com',
+#   'referer' : 'http://my.example.net' }
+#
+# In chrome storage:
+#
+# { 'example.com' : {
+#     'referer' : 'http://my.example.net',
+#     'id: 123
+#   }
+# }
+#
+# Special storage objects:
+#
+# { '__new_domain__' : {
+#     'referer' : '__new_referer__'
+#     'id': 'f8bfee95-2773-4427-y1a4-4567e156107e'
+#   }
+# }
 root.Refref = Backbone.Model.extend {
   toStorageFormat: ->
     obj = {}
@@ -40,7 +70,7 @@ root.Refref = Backbone.Model.extend {
   # Return promise
   sync: (method, model) ->
     data = model.toStorageFormat()
-    puts 1, 'SYNC', '%s: %s: %s', model.cid, method, (JSON.stringify data)
+    puts 1, 'SYNC', '%s: %s: %s', model.id, method, (JSON.stringify data)
 
     switch method
       when 'create', 'update'
@@ -51,31 +81,31 @@ root.Refref = Backbone.Model.extend {
         .then ->
           storage.set(data)
         .then ->
-          model.id = model.cid # TODO: make uuid
-          puts 1, 'SYNC', '%s: %s: ok', model.cid, method
+          puts 1, 'SYNC', '%s: %s: ok', model.id, method
         , (e) ->
-          puts 0, 'SYNC', '%s: %s: FAIL: %s', model.cid, method, e.message
+          puts 0, 'SYNC', '%s: %s: FAIL: %s', model.id, method, e.message
       when 'read'
         throw new Error 'not implemented'
       when 'delete'
         storage.rm(model.get('domain'))
         .then ->
-          puts 1, 'SYNC', '%s: %s: ok', model.cid, method
+          puts 1, 'SYNC', '%s: %s: ok', model.id, method
         , (e) ->
-          puts 0, 'SYNC', '%s: %s: FAIL: %s', model.cid, method, e.message
+          puts 0, 'SYNC', '%s: %s: FAIL: %s', model.id, method, e.message
 
   validate: (attrs, options) ->
     return "domain is invalid" unless root.Refref.isValidDomain attrs.domain
     return "referer is invalid" unless root.Refref.isValidReferer attrs.referer
+    return "id is invalid" unless attrs?.id
     undefined
 
   initialize: ->
     @on {
       'change': ->
-        puts 1, 'change', @cid
+        puts 1, 'change', @id
         @save()
       'destroy': ->
-        puts 1, 'destroy', @cid
+        puts 1, 'destroy', @id
         @view.remove()
     }
 }, {
@@ -88,13 +118,18 @@ root.Refref = Backbone.Model.extend {
       return false
     true
 
+  # empty string is valid
   isValidReferer: (referer) ->
-    return false unless referer?.match /^\S{3,}$/
+    return false unless referer.match
+    return false if referer.match /^\s+$/
     true
+
+  isValidInternalStorageName: (name) ->
+    name.match /^__[0-9A-Za-z_]+__$/
 
   storage2arr: (raw_data) ->
     console.log raw_data if root.VERBOSE
-    ((val.domain = key; val) for key,val of raw_data)
+    ((val.domain = key; val) for key,val of raw_data when !root.Refref.isValidInternalStorageName(key))
 
   # Fill google storage area with predefined options for several sites.
   # Warning: clears every other data in the storage.
@@ -105,10 +140,10 @@ root.Refref = Backbone.Model.extend {
     everybody_wants_this =
       'wsj.com':
         referer: 'http://news.google.com'
-        id: 1
+        id: '1'
       'ft.com':
         referer: 'http://news.google.com'
-        id: 2
+        id: '2'
 
     storage.clean()
     .then ->
@@ -128,8 +163,8 @@ domFlash = (element, funcall) ->
 
 root.RefrefView = Backbone.View.extend {
   el: ->
-    $('#refrefs').append "<tr id='#{@model.cid}'></tr>"
-    '#' + @model.cid
+    $('#refrefs').append "<tr id='#{@model.id}'></tr>"
+    '#' + @model.id
 
   initialize: ->
     throw new Error 'no model specified' unless @model
@@ -144,13 +179,13 @@ root.RefrefView = Backbone.View.extend {
 <td class='refref-referer-edit'><input value='#{@model.get('referer')}'></td>"
 
   render: ->
-    puts 1, "view render", @model.cid
+    puts 1, "view render", @model.id
     this.$el.html @template(@model.attributes)
     this
 
   # save changes in model from a gui element
   gui2model: (attr, event) ->
-    puts 1, 'view dom change', @model.cid
+    puts 1, 'view dom change', @model.id
     obj = {}
     obj[attr] = event.target.value
     if !@model.set obj, {validate: true}
@@ -163,7 +198,7 @@ root.RefrefView = Backbone.View.extend {
     'change .refref-referer-edit': (event) ->
       @gui2model 'referer', event
     'click .refref-destroy': (event) ->
-      puts 1, 'view destroy', "#{@model.cid}: isNew=#{@model.isNew()}"
+      puts 1, 'view destroy', "#{@model.id}: isNew=#{@model.isNew()}"
       @model.destroy()
   }
 }
@@ -176,11 +211,31 @@ root.RefrefsView = Backbone.View.extend {
   initialize: ->
     throw new Error 'no collection specified' unless @collection
     @listenTo(@collection, 'reset', @render)
+    @listenTo(@collection, 'add', @renderNewModel)
+
+    $('#refrefs-add').on 'click', =>
+      @collection.create {
+        domain: '__new_domain__'
+        referer: ''
+        id: uuid()
+      }
 
   render: ->
     @collection.each (idx) ->
       mview = new root.RefrefView { model: idx }
       mview.render()
+    this
+
+  renderNewModel: (model) ->
+    puts 1, 'collection renderNewModel', model.id
+    mview = new root.RefrefView { model: model }
+    mview.render()
+
+    elements = $('input', mview.$el)
+    idx.value = '' for idx in elements
+    elements[0].focus()
+
+    mview
 }
 
 # main
