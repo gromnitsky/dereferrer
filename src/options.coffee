@@ -1,4 +1,9 @@
+underTests = ->
+  return true if jasmine?
+  false
+
 root = exports ? this
+root = window if underTests()
 
 $ = require '../vendor/zepto.shim'
 _ = require 'underscore'
@@ -182,7 +187,7 @@ root.RefrefsView = Backbone.View.extend {
   initialize: ->
     throw new Error 'no collection specified' unless @collection
     @listenTo(@collection, 'reset', @render)
-    @listenTo(@collection, 'add', @renderNewModel)
+    @listenTo(@collection, 'add', @addNew)
 
     $('#refrefs-add').on 'click', =>
       @collection.create {
@@ -197,8 +202,8 @@ root.RefrefsView = Backbone.View.extend {
       mview.render()
     this
 
-  renderNewModel: (model) ->
-    fub.puts 1, 'collection renderNewModel', model.id
+  addNew: (model) ->
+    fub.puts 1, 'collection addNew', model.id
     mview = new root.RefrefView { model: model }
     mview.render()
 
@@ -209,9 +214,7 @@ root.RefrefsView = Backbone.View.extend {
     mview
 }
 
-
-# main
-$ ->
+root.main = ->
   storage.getSize()
   .then (bytes) ->
     root.Refref.setDefaults() if bytes == 0
@@ -227,4 +230,9 @@ $ ->
     refrefs_table = new root.RefrefsView({collection: refrefs})
     refrefs_table.render()
     refrefs.reset model_data
+
+#    console.log(document.querySelector('#refrefs'))
   .done()
+
+$ ->
+  root.main() unless underTests()
