@@ -202,7 +202,7 @@ root.RefrefsView = Backbone.View.extend {
     mview = new root.RefrefView { model: model }
     mview.render()
 
-    elements = $('input', mview.$el)
+    elements = mview.$('input')
     idx.value = '' for idx in elements
     elements[0].focus()
 
