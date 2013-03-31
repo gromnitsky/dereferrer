@@ -2,7 +2,7 @@
 
 - [ ] find template library that works in chrome extensions
 - [ ] reset button
-- [ ] domainzone
+- [X] domainzone
 - [X] mock chrome storage
 - [ ] move to storage.sync instead of storage.local
 - [X] jasmine tests for options.coffee

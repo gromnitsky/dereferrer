@@ -11,6 +11,7 @@
     isn't empty.
 */
 
+/*global root:true */
 var getGlobal = function() {
 	var _getGlobal = function() { return this }
 	return _getGlobal()
@@ -56,7 +57,7 @@ root.chrome.storage = {
 			callback()
 		},
 		remove: function(key, callback) {
-			delete root.chrome.mock.value[key]
+			delete root.chrome.mock.value.key
 			callback()
 		},
 		clear: function(callback) {
