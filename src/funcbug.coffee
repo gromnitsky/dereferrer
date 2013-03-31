@@ -14,3 +14,14 @@ exports.uuid = ->
     ret
 
   (S4(buf[0])+S4(buf[1])+"-"+S4(buf[2])+"-4"+S4(buf[3]).substring(1)+"-y"+S4(buf[4]).substring(1)+"-"+S4(buf[5])+S4(buf[6])+S4(buf[7]))
+
+exports.domFlash = (element, funcall) ->
+  oldcolor = element.style.backgroundColor
+  element.style.backgroundColor = 'red'
+  try
+    funcall()
+  catch e
+    alert "Error: #{e.message}"
+    throw e
+  finally
+    element.style.backgroundColor = oldcolor

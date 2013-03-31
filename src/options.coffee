@@ -127,17 +127,6 @@ root.Refref = Backbone.Model.extend {
       storage.set everybody_wants_this
 }
 
-domFlash = (element, funcall) ->
-  oldcolor = element.style.backgroundColor
-  element.style.backgroundColor = 'red'
-  try
-    funcall()
-  catch e
-    alert "Error: #{e.message}"
-    throw e
-  finally
-    element.style.backgroundColor = oldcolor
-
 root.RefrefView = Backbone.View.extend {
   el: ->
     $('#refrefs').append "<tr id='#{@model.id}'></tr>"
@@ -166,7 +155,7 @@ root.RefrefView = Backbone.View.extend {
     obj = {}
     obj[attr] = event.target.value
     if !@model.set obj, {validate: true}
-      domFlash event.target, -> alert 'Invalid value'
+      fub.domFlash event.target, -> alert 'Invalid value'
       event.target.focus()
 
   events: {
