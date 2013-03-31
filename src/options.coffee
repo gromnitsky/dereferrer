@@ -10,7 +10,7 @@ $ = require '../vendor/zepto.shim'
 _ = require 'underscore'
 Backbone = require 'backbone'
 
-fub = require './funcbug'
+fub = require './funcbag'
 DomainZone = require './domainzone'
 storage = new (require './chrome_storage')()
 

@@ -16,7 +16,7 @@ temp_js := $(patsubst %.coffee,%.js,$(wildcard *.coffee))
 all: compile
 
 $(out)/background.js: chrome_storage.js
-$(out)/options.js: chrome_storage.js domainzone.js funcbug.js
+$(out)/options.js: chrome_storage.js domainzone.js funcbag.js
 
 %.js: %.coffee
 	$(COFFEE) -c $<
