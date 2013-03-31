@@ -1,5 +1,5 @@
 /*global jasmine, beforeEach, afterEach, describe, it, expect, waitsFor,
-  runs, main */
+  runs, startHere */
 
 var container
 
@@ -9,7 +9,7 @@ $(function() {
 <button id="refrefs-add">Add</button>\
 </div>').appendTo('body')
 
-	main() // start options.js
+	startHere() // start options.js
 //	console.log(document.querySelector('#jasmine_content'))
 })
 

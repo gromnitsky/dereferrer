@@ -1,9 +1,10 @@
-underTests = ->
-  return true if jasmine?
-  false
-
-root = exports ? this
-root = window if underTests()
+# Detection of browserify, node or browser
+getGlobal = ->
+  _getGlobal = -> this
+  _getGlobal()
+isUnderTests = -> jasmine?
+isBrowserify = -> module?.exports? && !require?.extensions
+root = if isBrowserify() then getGlobal() else exports ? getGlobal()
 
 $ = require '../vendor/zepto.shim'
 _ = require 'underscore'
@@ -214,7 +215,7 @@ root.RefrefsView = Backbone.View.extend {
     mview
 }
 
-root.main = ->
+root.startHere = ->
   storage.getSize()
   .then (bytes) ->
     root.Refref.setDefaults() if bytes == 0
@@ -235,4 +236,4 @@ root.main = ->
   .done()
 
 $ ->
-  root.main() unless underTests()
+  root.startHere() unless isUnderTests()
