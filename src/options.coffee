@@ -71,7 +71,7 @@ root.Refref = Backbone.Model.extend {
           fub.puts 0, 'SYNC', '%s: %s: FAIL: %s', model.id, method, e.message
 
   validate: (attrs, options) ->
-    return "domain is invalid" unless root.Refref.isValidDomain attrs.domain
+    return "domain is invalid" unless DomainZone.Validate attrs.domain
     return "referer is invalid" unless root.Refref.isValidReferer attrs.referer
     return "id is invalid" unless attrs?.id
     undefined
@@ -87,13 +87,6 @@ root.Refref = Backbone.Model.extend {
     }
 }, {
   # Model Class methods
-
-  isValidDomain: (domain) ->
-    try
-      new DomainZone domain
-    catch e
-      return false
-    true
 
   # empty string is valid
   isValidReferer: (referer) ->
