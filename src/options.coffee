@@ -7,7 +7,6 @@ isBrowserify = -> module?.exports? && !require?.extensions
 root = if isBrowserify() then getGlobal() else exports ? getGlobal()
 
 $ = require '../vendor/zepto.shim'
-_ = require 'underscore'
 Backbone = require 'backbone'
 
 fub = require './funcbag'
@@ -23,40 +22,30 @@ storage = new (require './chrome_storage')()
 #
 # In chrome storage:
 #
-# { 'example.com' : {
+# { '123' : {
+#     'domain': 'example.com'
 #     'referer' : 'http://my.example.net',
-#     'id: 123
 #   }
 # }
 #
 # Special storage objects:
 #
-# { '__new_domain__' : {
-#     'referer' : '__new_referer__'
-#     'id': 'f8bfee95-2773-4427-y1a4-4567e156107e'
+# { '__my_options__' : {
+#     'foo' : 'bar'
 #   }
 # }
 root.Refref = Backbone.Model.extend {
   toStorageFormat: ->
     obj = {}
-    obj[@get('domain')] =
+    obj[@get('id')] =
+      domain: @get('domain')
       referer: @get('referer')
-      id: @get('id')
     obj
 
-  # Return promise
   sync: (method, model) ->
-    data = model.toStorageFormat()
-    fub.puts 1, 'SYNC', '%s: %s: %s', model.id, method, (JSON.stringify data)
-
     switch method
       when 'create', 'update'
-        # remove previous, then update
-        copy = model.clone()
-        copy.set(model.previousAttributes(), {silent: true})
-        @sync('delete', copy)
-        .then ->
-          storage.set(data)
+        storage.set(model.toStorageFormat())
         .then ->
           fub.puts 1, 'SYNC', '%s: %s: ok', model.id, method
         , (e) ->
@@ -64,7 +53,9 @@ root.Refref = Backbone.Model.extend {
       when 'read'
         throw new Error 'not implemented'
       when 'delete'
-        storage.rm(model.get('domain'))
+        return unless @get('domain')
+
+        storage.rm(model.get('id'))
         .then ->
           fub.puts 1, 'SYNC', '%s: %s: ok', model.id, method
         , (e) ->
@@ -99,7 +90,7 @@ root.Refref = Backbone.Model.extend {
 
   storage2arr: (raw_data) ->
     console.log raw_data if root.VERBOSE
-    ((val.domain = key; val) for key,val of raw_data when !root.Refref.isValidInternalStorageName(key))
+    ((val.id = key; val) for key,val of raw_data when !root.Refref.isValidInternalStorageName(key))
 
   # Fill google storage area with predefined options for several sites.
   # Warning: clears every other data in the storage.
@@ -108,12 +99,12 @@ root.Refref = Backbone.Model.extend {
   setDefaults: ->
     fub.puts 1, 'storage', 'cleaning & refilling'
     everybody_wants_this =
-      'wsj.com':
+      '1':
+        domain: 'wsj.com'
         referer: 'http://news.google.com'
-        id: '1'
-      'ft.com':
+      '2':
+        domain: 'ft.com'
         referer: 'http://news.google.com'
-        id: '2'
 
     storage.clean()
     .then ->
@@ -173,8 +164,9 @@ root.RefrefsView = Backbone.View.extend {
     @listenTo(@collection, 'add', @addNew)
 
     $('#refrefs-add').on 'click', =>
+      # model that won't pass its validation
       @collection.create {
-        domain: '__new_domain__'
+        domain: ''
         referer: ''
         id: fub.uuid()
       }
@@ -186,14 +178,11 @@ root.RefrefsView = Backbone.View.extend {
     this
 
   addNew: (model) ->
-    fub.puts 1, 'collection addNew', model.id
+    fub.puts 1, 'collection', '(%s) addNew: %s', @collection.length, model.id
     mview = new root.RefrefView { model: model }
     mview.render()
 
-    elements = mview.$('input')
-    idx.value = '' for idx in elements
-    elements[0].focus()
-
+    mview.$('input')[0].focus()
     mview
 }
 

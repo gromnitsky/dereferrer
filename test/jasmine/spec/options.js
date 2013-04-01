@@ -58,13 +58,13 @@ describe("Modifying refrefs", function() {
 			domain.trigger('change')
 			expect(window.alert.calls.length).toEqual(1)
 
-			var insertedRefref
+			var storage_contents
 			waitsFor(function() {
-				chrome.storage.local.get('123', function(val) {
-					insertedRefref = val
+				chrome.storage.local.get(null, function(val) {
+					storage_contents = Object.keys(val)
 				})
-				if (insertedRefref) return true
-			}, "123 appear in the storage", 1000)
+				if (storage_contents.length == 3) return true
+			}, "3 storage objects to be in the storage", 1000)
 		})
 	})
 })
