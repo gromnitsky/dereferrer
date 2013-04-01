@@ -186,13 +186,14 @@ root.RefrefsView = Backbone.View.extend {
         id: fub.uuid()
       }
 
-    that = this
+    self = this
     $('#refrefs-reset').on 'click', ->
+      return unless confirm 'Are you sure? \n\nAll your customizations will be lost without an ability to undo.'
       root.Refref.setDefaults()
       .then ->
         root.Refref.Load()
       .then (model_data) ->
-        that.collection.reset model_data
+        self.collection.reset model_data
 
   render: ->
     fub.puts 1, 'collection view', 'render'

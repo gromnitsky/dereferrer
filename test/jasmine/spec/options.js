@@ -48,32 +48,29 @@ describe("Modifying refrefs", function() {
 	})
 
 	it("adds new refref", function() {
-		runs(function() {
-			var domain = $('#refrefs tr:last input:first')
-			domain.get(0).value = '12'
-			domain.trigger('change')
-			expect(window.alert.calls.length).toEqual(1)
+		var domain = $('#refrefs tr:last input:first')
+		domain.get(0).value = '12'
+		domain.trigger('change')
+		expect(window.alert.calls.length).toEqual(1)
 
-			domain.get(0).value = '123'
-			domain.trigger('change')
-			expect(window.alert.calls.length).toEqual(1)
+		domain.get(0).value = '123'
+		domain.trigger('change')
+		expect(window.alert.calls.length).toEqual(1)
 
-			var storage_contents
-			chrome.storage.local.get(null, function(val) {
-				storage_contents = Object.keys(val)
-			})
-			waitsFor(function() {
-				if (storage_contents.length == 3) return true
-			}, "3 storage objects to be in the storage", 1000)
+		var storage_contents
+		chrome.storage.local.get(null, function(val) {
+			storage_contents = Object.keys(val)
 		})
+		waitsFor(function() {
+			if (storage_contents.length == 3) return true
+		}, "3 storage objects to be in the storage", 1000)
 	})
 })
 
 describe("Reset", function() {
 	it("resets to defaults", function() {
-		runs(function() {
-			$('#refrefs-reset').click()
-		})
+		spyOn(window, 'confirm').andReturn(true)
+		$('#refrefs-reset').click()
 		waitsFor(function() {
 			if ($('tr', container).length === 3) return true
 		}, "2 refrefs to appear", 1000)

@@ -1,10 +1,9 @@
 * 0.0.1
 
-- [ ] find template library that works in chrome extensions
-- [ ] reset button
+- [X] reset button
 - [X] domainzone
 - [X] mock chrome storage
-- [ ] move to storage.sync instead of storage.local
 - [X] jasmine tests for options.coffee
-- [ ] more jasmine tests for options.coffee
+- [ ] find template library that works in chrome extensions
+- [ ] move to storage.sync instead of storage.local
 - [ ] background.coffee
