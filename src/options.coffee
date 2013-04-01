@@ -70,10 +70,10 @@ root.Refref = Backbone.Model.extend {
   initialize: ->
     @on {
       'change': ->
-        fub.puts 1, 'change', @id
+        fub.puts 1, 'model change', @id
         @save()
       'destroy': ->
-        fub.puts 1, 'destroy', @id
+        fub.puts 1, 'model destroy', @id
         @view.remove()
     }
 }, {
@@ -109,6 +109,15 @@ root.Refref = Backbone.Model.extend {
     storage.clean()
     .then ->
       storage.set everybody_wants_this
+
+  # Load all models form the storage.
+  # Return a promise.
+  Load: ->
+    fub.puts 1, 'storage', 'reading'
+    storage.get()
+    .then (result) ->
+      # an array of jsonified models
+      return root.Refref.storage2arr(result)
 }
 
 root.RefrefView = Backbone.View.extend {
@@ -129,13 +138,13 @@ root.RefrefView = Backbone.View.extend {
 <td class='refref-referer-edit'><input value='#{@model.get('referer')}'></td>"
 
   render: ->
-    fub.puts 1, "view render", @model.id
-    this.$el.html @template(@model.attributes)
+    fub.puts 1, 'model view', 'render: %s', @model.id
+    this.$el.html @template()
     this
 
   # save changes in model from a gui element
   gui2model: (attr, event) ->
-    fub.puts 1, 'view dom change', @model.id
+    fub.puts 1, 'model view', 'dom change: %s', @model.id
     obj = {}
     obj[attr] = event.target.value
     if !@model.set obj, {validate: true}
@@ -148,7 +157,7 @@ root.RefrefView = Backbone.View.extend {
     'change .refref-referer-edit': (event) ->
       @gui2model 'referer', event
     'click .refref-destroy': (event) ->
-      fub.puts 1, 'view destroy', "#{@model.id}: isNew=#{@model.isNew()}"
+      fub.puts 1, 'model view', 'destroy: %s: isNew=%s', @model.id, @model.isNew()
       @model.destroy()
   }
 }
@@ -158,6 +167,12 @@ root.Refrefs = Backbone.Collection.extend {
 }
 
 root.RefrefsView = Backbone.View.extend {
+  el: '#refrefs'
+
+  # just a table header
+  template: ->
+    "<tr><th></th><th>Domain</th><th>Referrer</th></tr>"
+
   initialize: ->
     throw new Error 'no collection specified' unless @collection
     @listenTo(@collection, 'reset', @render)
@@ -171,14 +186,25 @@ root.RefrefsView = Backbone.View.extend {
         id: fub.uuid()
       }
 
+    that = this
+    $('#refrefs-reset').on 'click', ->
+      root.Refref.setDefaults()
+      .then ->
+        root.Refref.Load()
+      .then (model_data) ->
+        that.collection.reset model_data
+
   render: ->
+    fub.puts 1, 'collection view', 'render'
+    this.$el.html @template()
+
     @collection.each (idx) ->
       mview = new root.RefrefView { model: idx }
       mview.render()
     this
 
   addNew: (model) ->
-    fub.puts 1, 'collection', '(%s) addNew: %s', @collection.length, model.id
+    fub.puts 1, 'collection view', '(%s) addNew: %s', @collection.length, model.id
     mview = new root.RefrefView { model: model }
     mview.render()
 
@@ -191,16 +217,12 @@ root.startHere = ->
   .then (bytes) ->
     root.Refref.setDefaults() if bytes == 0
   .then ->
-    fub.puts 1, 'storage', 'reading'
-    storage.get()
-  .then (result) ->
-    # get an array of jsonified models
-    model_data = root.Refref.storage2arr(result)
+    root.Refref.Load()
+  .then (model_data) ->
 
     # create a collection, collection-view and call collection.reset()
     refrefs = new root.Refrefs()
     refrefs_table = new root.RefrefsView({collection: refrefs})
-    refrefs_table.render()
     refrefs.reset model_data
 
 #    console.log(document.querySelector('#refrefs'))
