@@ -1,9 +1,6 @@
 # Detection of browserify, node or browser
-getGlobal = ->
-  _getGlobal = -> this
-  _getGlobal()
-isUnderTests = -> jasmine?
-isBrowserify = -> module?.exports? && !require?.extensions
+getGlobal = -> (_getGlobal = -> this)()
+isBrowserify = -> exports? && !require?.extensions
 root = if isBrowserify() then getGlobal() else exports ? getGlobal()
 
 $ = require '../vendor/zepto.shim'
@@ -13,6 +10,12 @@ fub = require './funcbag'
 DomainZone = require './domainzone'
 storage = new (require './chrome_storage')()
 
+isUnderTests = -> jasmine?
+
+# For having not only Refref models in the storage. Reserved for the
+# future. For example, __options__
+storage.isValidHiddenKey = (name) ->
+  name.match /^__[0-9A-Za-z_]+__$/
 
 # Backbone model:
 #
@@ -50,11 +53,12 @@ root.Refref = Backbone.Model.extend {
           fub.puts 1, 'SYNC', '%s: %s: ok', model.id, method
         , (e) ->
           fub.puts 0, 'SYNC', '%s: %s: FAIL: %s', model.id, method, e.message
+
       when 'read'
         throw new Error 'not implemented'
+
       when 'delete'
         return unless @get('domain')
-
         storage.rm(model.get('id'))
         .then ->
           fub.puts 1, 'SYNC', '%s: %s: ok', model.id, method
@@ -63,7 +67,7 @@ root.Refref = Backbone.Model.extend {
 
   validate: (attrs, options) ->
     return "domain is invalid" unless DomainZone.Validate attrs.domain
-    return "referer is invalid" unless root.Refref.isValidReferer attrs.referer
+    return "referer is invalid" unless root.Refref.IsValidReferer attrs.referer
     return "id is invalid" unless attrs?.id
     undefined
 
@@ -72,31 +76,29 @@ root.Refref = Backbone.Model.extend {
       'change': ->
         fub.puts 1, 'model change', @id
         @save()
+
       'destroy': ->
         fub.puts 1, 'model destroy', @id
         @view.remove()
     }
-}, {
-  # Model Class methods
 
-  # empty string is valid
-  isValidReferer: (referer) ->
+}, {
+  # Class methods
+
+  # Empty string is valid too.
+  IsValidReferer: (referer) ->
     return false unless referer.match
     return false if referer.match /^\s+$/
     true
 
-  isValidInternalStorageName: (name) ->
-    name.match /^__[0-9A-Za-z_]+__$/
-
-  storage2arr: (raw_data) ->
-    console.log raw_data if root.VERBOSE
-    ((val.id = key; val) for key,val of raw_data when !root.Refref.isValidInternalStorageName(key))
+  Storage2arr: (raw_data) ->
+    ((val.id = key; val) for key,val of raw_data when !storage.isValidHiddenKey(key))
 
   # Fill google storage area with predefined options for several sites.
   # Warning: clears every other data in the storage.
   #
   # Return a promise.
-  setDefaults: ->
+  SetDefaults: ->
     fub.puts 1, 'storage', 'cleaning & refilling'
     everybody_wants_this =
       '1':
@@ -117,7 +119,7 @@ root.Refref = Backbone.Model.extend {
     storage.get()
     .then (result) ->
       # an array of jsonified models
-      return root.Refref.storage2arr(result)
+      return root.Refref.Storage2arr(result)
 }
 
 root.RefrefView = Backbone.View.extend {
@@ -126,9 +128,9 @@ root.RefrefView = Backbone.View.extend {
     '#' + @model.id
 
   initialize: ->
-    throw new Error 'no model specified' unless @model
+    throw new Error 'no model linked' unless @model
     @model.view = this
-    @listenTo(@model, 'change', @render)
+    @listenTo @model, 'change', @render
 
   # can't use _.template() due to chrome policy that is too long to
   # describe here. TODO: find a nice templating library
@@ -154,11 +156,16 @@ root.RefrefView = Backbone.View.extend {
   events: {
     'change .refref-domain-edit': (event) ->
       @gui2model 'domain', event
+
     'change .refref-referer-edit': (event) ->
       @gui2model 'referer', event
+
     'click .refref-destroy': (event) ->
+      # removes itself from the linked collection too
       fub.puts 1, 'model view', 'destroy: %s: isNew=%s', @model.id, @model.isNew()
+      collection = @model.collection
       @model.destroy()
+      fub.puts 1, 'collection size', collection.length if collection
   }
 }
 
@@ -170,13 +177,12 @@ root.RefrefsView = Backbone.View.extend {
   el: '#refrefs'
 
   # just a table header
-  template: ->
-    "<tr><th></th><th>Domain</th><th>Referrer</th></tr>"
+  template: '<tr><th>&equiv;</th><th>Domain</th><th>Referrer</th></tr>'
 
   initialize: ->
-    throw new Error 'no collection specified' unless @collection
-    @listenTo(@collection, 'reset', @render)
-    @listenTo(@collection, 'add', @addNew)
+    throw new Error 'no collection linked' unless @collection
+    @listenTo @collection, 'reset', @render
+    @listenTo @collection, 'add', @addRefref
 
     $('#refrefs-add').on 'click', =>
       # model that won't pass its validation
@@ -189,7 +195,7 @@ root.RefrefsView = Backbone.View.extend {
     self = this
     $('#refrefs-reset').on 'click', ->
       return unless confirm 'Are you sure? \n\nAll your customizations will be lost without an ability to undo.'
-      root.Refref.setDefaults()
+      root.Refref.SetDefaults()
       .then ->
         root.Refref.Load()
       .then (model_data) ->
@@ -197,15 +203,15 @@ root.RefrefsView = Backbone.View.extend {
 
   render: ->
     fub.puts 1, 'collection view', 'render'
-    this.$el.html @template()
+    this.$el.html @template
 
     @collection.each (idx) ->
       mview = new root.RefrefView { model: idx }
       mview.render()
     this
 
-  addNew: (model) ->
-    fub.puts 1, 'collection view', '(%s) addNew: %s', @collection.length, model.id
+  addRefref: (model) ->
+    fub.puts 1, 'collection view', 'cur size: %s; addRefref: %s', @collection.length, model.id
     mview = new root.RefrefView { model: model }
     mview.render()
 
@@ -216,18 +222,17 @@ root.RefrefsView = Backbone.View.extend {
 root.startHere = ->
   storage.getSize()
   .then (bytes) ->
-    root.Refref.setDefaults() if bytes == 0
+    root.Refref.SetDefaults() if bytes == 0
   .then ->
     root.Refref.Load()
   .then (model_data) ->
-
     # create a collection, collection-view and call collection.reset()
     refrefs = new root.Refrefs()
     refrefs_table = new root.RefrefsView({collection: refrefs})
     refrefs.reset model_data
-
-#    console.log(document.querySelector('#refrefs'))
   .done()
 
+
+# main
 $ ->
   root.startHere() unless isUnderTests()
