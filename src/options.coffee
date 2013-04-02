@@ -150,12 +150,16 @@ root.RefrefView = Backbone.View.extend {
     obj = {}
     obj[attr] = event.target.value
     if !@model.set obj, {validate: true}
-      fub.domFlash event.target, -> alert 'Invalid value'
+      fub.domFlash event.target.parentNode.parentNode, -> alert 'Invalid value'
       event.target.focus()
 
   events: {
     'change .refref-domain-edit': (event) ->
-      @gui2model 'domain', event
+      if @model.collection?.filterByDomain(event.target.value, @model.id).length > 0
+        fub.domFlash event.target.parentNode.parentNode, -> alert 'Domain must be unique'
+        event.target.focus()
+      else
+        @gui2model 'domain', event
 
     'change .refref-referer-edit': (event) ->
       @gui2model 'referer', event
@@ -170,7 +174,11 @@ root.RefrefView = Backbone.View.extend {
 }
 
 root.Refrefs = Backbone.Collection.extend {
-  model: root.Refref
+  model: root.Refref,
+
+  filterByDomain: (domain, id) ->
+    @filter (idx) ->
+      domain == idx.get('domain') && id != idx.id
 }
 
 root.RefrefsView = Backbone.View.extend {
