@@ -8,14 +8,9 @@ Backbone = require 'backbone'
 
 fub = require './funcbag'
 DomainZone = require './domainzone'
-storage = new (require './chrome_storage')()
+storage = require './storage'
 
 isUnderTests = -> jasmine?
-
-# For having not only Refref models in the storage. Reserved for the
-# future. For example, __options__
-storage.isValidHiddenKey = (name) ->
-  name.match /^__[0-9A-Za-z_]+__$/
 
 # Backbone model:
 #
@@ -90,36 +85,6 @@ root.Refref = Backbone.Model.extend {
     return false unless referer.match
     return false if referer.match /^\s+$/
     true
-
-  Storage2arr: (raw_data) ->
-    ((val.id = key; val) for key,val of raw_data when !storage.isValidHiddenKey(key))
-
-  # Fill google storage area with predefined options for several sites.
-  # Warning: clears every other data in the storage.
-  #
-  # Return a promise.
-  SetDefaults: ->
-    fub.puts 1, 'storage', 'cleaning & refilling'
-    everybody_wants_this =
-      '1':
-        domain: 'wsj.com'
-        referer: 'http://news.google.com'
-      '2':
-        domain: 'ft.com'
-        referer: 'http://news.google.com'
-
-    storage.clean()
-    .then ->
-      storage.set everybody_wants_this
-
-  # Load all models form the storage.
-  # Return a promise.
-  Load: ->
-    fub.puts 1, 'storage', 'reading'
-    storage.get()
-    .then (result) ->
-      # an array of jsonified models
-      return root.Refref.Storage2arr(result)
 }
 
 root.RefrefView = Backbone.View.extend {
@@ -203,9 +168,9 @@ root.RefrefsView = Backbone.View.extend {
     self = this
     $('#refrefs-reset').on 'click', ->
       return unless confirm 'Are you sure? \n\nAll your customizations will be lost without an ability to undo.'
-      root.Refref.SetDefaults()
+      storage.setDefaults()
       .then ->
-        root.Refref.Load()
+        storage.load()
       .then (model_data) ->
         self.collection.reset model_data
 
@@ -230,9 +195,9 @@ root.RefrefsView = Backbone.View.extend {
 root.startHere = ->
   storage.getSize()
   .then (bytes) ->
-    root.Refref.SetDefaults() if bytes == 0
+    storage.setDefaults() if bytes == 0
   .then ->
-    root.Refref.Load()
+    storage.load()
   .then (model_data) ->
     # create a collection, collection-view and call collection.reset()
     refrefs = new root.Refrefs()
