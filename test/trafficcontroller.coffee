@@ -71,3 +71,21 @@ suite 'TrafficController', ->
     assert.deepEqual {value: 'http://example.com', index: 2 },
       bg.TrafficController.RefererFind(@webrequest1.requestHeaders)
     assert.equal null, bg.TrafficController.RefererFind(@webrequest2.requestHeaders)
+
+  test 'RefererSet fail', ->
+    assert.equal null, bg.TrafficController.RefererSet()
+
+    bg.TrafficController.RefererSet @webrequest2, ' '
+    assert.equal null, bg.TrafficController.RefererFind(@webrequest2.requestHeaders)
+
+  test 'RefererSet', ->
+    assert.equal 'http://example.com', @webrequest1.requestHeaders[2].value
+    bg.TrafficController.RefererSet @webrequest1, ' f o o '
+    assert.equal 'foo', @webrequest1.requestHeaders[2].value
+
+    bg.TrafficController.RefererSet @webrequest1, '  '
+    assert.equal null, bg.TrafficController.RefererFind(@webrequest1.requestHeaders)
+
+    bg.TrafficController.RefererSet @webrequest1, 'bar'
+    assert.deepEqual {value: 'bar', index: 4 },
+      bg.TrafficController.RefererFind(@webrequest1.requestHeaders)

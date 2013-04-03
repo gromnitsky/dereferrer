@@ -39,7 +39,7 @@ class root.TrafficController
 
     obj = null
     for hdr,idx in headers
-      if hdr.name.match /^referer$/i
+      if hdr?.name.match /^referer$/i
         obj = {}
         obj.index = idx
         obj.value = hdr.value
@@ -55,7 +55,7 @@ class root.TrafficController
 
     if value
       if ref
-        webRequest.requestHeaders[ref.index] = value
+        webRequest.requestHeaders[ref.index].value = value
       else
         webRequest.requestHeaders.push {
           name: 'Referer'
