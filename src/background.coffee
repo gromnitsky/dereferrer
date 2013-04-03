@@ -5,6 +5,7 @@ root = if isBrowserify() then getGlobal() else exports ? getGlobal()
 
 Q = require 'q'
 
+DomainZone = require './domainzone'
 fub = require './funcbag'
 storage = require './storage'
 
@@ -64,13 +65,24 @@ class root.TrafficController
     else
       webRequest.requestHeaders.splice ref.index, 1 if ref
 
+  requestModify: (webRequest) ->
+    return {} unless webRequest?.requestHeaders
+
+    for idx in @rules
+      if DomainZone.Match idx.domain, webRequest.url
+        root.TrafficController.RefererSet webRequest, idx.referer
+        fub.puts 1, 'onBeforeSendHeaders', '%s: %s', webRequest.url, idx.referer
+        break
+
+    {requestHeaders: webRequest.requestHeaders}
+
 
 # main
 root.tc = new root.TrafficController()
 
 # hook into chrome's http request
 chrome.webRequest.onBeforeSendHeaders.addListener (details) ->
-  console.log details.requestHeaders
+  tc.requestModify details
 , { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders']
 
 storage.getSize()

@@ -83,9 +83,27 @@ suite 'TrafficController', ->
     bg.TrafficController.RefererSet @webrequest1, ' f o o '
     assert.equal 'foo', @webrequest1.requestHeaders[2].value
 
+    # remove header
     bg.TrafficController.RefererSet @webrequest1, '  '
     assert.equal null, bg.TrafficController.RefererFind(@webrequest1.requestHeaders)
 
+    # add it again
     bg.TrafficController.RefererSet @webrequest1, 'bar'
     assert.deepEqual {value: 'bar', index: 4 },
       bg.TrafficController.RefererFind(@webrequest1.requestHeaders)
+
+  test 'requestModify fail', ->
+    assert.deepEqual {}, bg.tc.requestModify()
+
+    result = bg.tc.requestModify @webrequest2
+    assert.equal null, bg.TrafficController.RefererFind(result.requestHeaders)
+
+    @webrequest2.url = 'http://foo.example.com'
+    result = bg.tc.requestModify @webrequest2
+    assert.equal null, bg.TrafficController.RefererFind(result.requestHeaders)
+
+  test 'requestModify', ->
+    @webrequest2.url = 'http://online.wsj.com/article/123.html'
+    result = bg.tc.requestModify @webrequest2
+    assert.deepEqual {"index":4,"value":"http://news.google.com"},
+      bg.TrafficController.RefererFind(result.requestHeaders)

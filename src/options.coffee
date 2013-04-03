@@ -116,9 +116,10 @@ root.RefrefView = Backbone.View.extend {
     fub.puts 1, 'model view', 'render: %s', @model.id
 
     if this.$('.refref-destroy').length == 0
+      # draw for the first time
       this.$el.html @template()
     else
-      # don't redraw the whole thing to preserves focus
+      # to preserve focus don't redraw the whole thing
       this.$('.refref-domain-edit').value = @model.get('domain')
       this.$('.refref-referer-edit').value = @model.get('referer')
 

@@ -6,4 +6,4 @@
 - [X] jasmine tests for options.coffee
 - [ ] find template library that works in chrome extensions
 - [ ] move to storage.sync instead of storage.local
-- [ ] background.coffee
+- [X] background.coffee
