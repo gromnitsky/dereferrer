@@ -12,8 +12,8 @@ class ChromeStorage
   getSize: (obj = null) ->
     dfr = Q.defer()
     @storage.getBytesInUse obj, (bytes) ->
-      if runtime?.lastError
-        dfr.reject (new Error runtime.lastError.message)
+      if chrome.runtime?.lastError
+        dfr.reject (new Error chrome.runtime.lastError.message)
       else
         dfr.resolve bytes
     dfr.promise
@@ -21,8 +21,8 @@ class ChromeStorage
   get: (obj = null) ->
     dfr = Q.defer()
     @storage.get obj, (items) ->
-      if runtime?.lastError
-        dfr.reject (new Error runtime.lastError.message)
+      if chrome.runtime?.lastError
+        dfr.reject (new Error chrome.runtime.lastError.message)
       else
         dfr.resolve items
     dfr.promise
@@ -30,8 +30,8 @@ class ChromeStorage
   set: (obj) ->
     dfr = Q.defer()
     @storage.set obj, ->
-      if runtime?.lastError
-        dfr.reject (new Error runtime.lastError.message)
+      if chrome.runtime?.lastError
+        dfr.reject (new Error chrome.runtime.lastError.message)
       else
         dfr.resolve true
     dfr.promise
@@ -39,8 +39,8 @@ class ChromeStorage
   rm: (obj) ->
     dfr = Q.defer()
     @storage.remove obj, ->
-      if runtime?.lastError
-        dfr.reject (new Error runtime.lastError.message)
+      if chrome.runtime?.lastError
+        dfr.reject (new Error chrome.runtime.lastError.message)
       else
         dfr.resolve true
     dfr.promise
@@ -48,8 +48,8 @@ class ChromeStorage
   clean: ->
     dfr = Q.defer()
     @storage.clear ->
-      if runtime?.lastError
-        dfr.reject (new Error runtime.lastError.message)
+      if chrome.runtime?.lastError
+        dfr.reject (new Error chrome.runtime.lastError.message)
       else
         dfr.resolve true
     dfr.promise

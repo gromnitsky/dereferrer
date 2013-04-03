@@ -1,9 +1,12 @@
+# Detection of browserify, node or browser
+getGlobal = -> (_getGlobal = -> this)()
+isBrowserify = -> exports? && !require?.extensions
+root = if isBrowserify() then getGlobal() else exports ? getGlobal()
+
 Q = require 'q'
 
 fub = require './funcbag'
 storage = require './storage'
-
-root = exports ? this
 
 class root.TrafficController
 
@@ -27,15 +30,15 @@ class root.TrafficController
 
 
 # main
-tc = new root.TrafficController()
+root.tc = new root.TrafficController()
 
 storage.getSize()
 .then (bytes) ->
   fub.puts 1, 'storage', '%s bytes', bytes
   storage.setDefaults() if bytes == 0
 .then ->
-  tc.rulesGet()
+  root.tc.rulesGet()
 .then (model_data) ->
-  tc.status()
+  root.tc.status()
   console.log model_data
 .done()

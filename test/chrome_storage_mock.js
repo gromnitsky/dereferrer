@@ -19,14 +19,16 @@ var getGlobal = function() {
 root = getGlobal()
 
 
-root.runtime = {
-	lastError: undefined
-}
-
 root.chrome = {
 	mock: {
 		value: {},
 		getBytesInUse: 0
+	},
+	runtime: {
+		lastError: undefined,
+		getBackgroundPage: function(callback) {
+			callback({})
+		}
 	}
 }
 

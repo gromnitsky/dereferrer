@@ -12,6 +12,10 @@ storage = require './storage'
 
 isUnderTests = -> jasmine?
 
+# Tell bg page to refresh refrefs.
+notifyBackgroung = ->
+  chrome.runtime.getBackgroundPage (bg) -> bg.tc?.rulesFresh = false
+
 # Backbone model:
 #
 # { 'domain' : 'example.com',
@@ -46,8 +50,10 @@ root.Refref = Backbone.Model.extend {
         storage.set(model.toStorageFormat())
         .then ->
           fub.puts 1, 'SYNC', '%s: %s: ok', model.id, method
+          notifyBackgroung()
         , (e) ->
           fub.puts 0, 'SYNC', '%s: %s: FAIL: %s', model.id, method, e.message
+        .done()
 
       when 'read'
         throw new Error 'not implemented'
@@ -57,8 +63,10 @@ root.Refref = Backbone.Model.extend {
         storage.rm(model.get('id'))
         .then ->
           fub.puts 1, 'SYNC', '%s: %s: ok', model.id, method
+          notifyBackgroung()
         , (e) ->
           fub.puts 0, 'SYNC', '%s: %s: FAIL: %s', model.id, method, e.message
+        .done()
 
   validate: (attrs, options) ->
     return "domain is invalid" unless DomainZone.Validate attrs.domain
@@ -173,6 +181,7 @@ root.RefrefsView = Backbone.View.extend {
         storage.load()
       .then (model_data) ->
         self.collection.reset model_data
+      .done()
 
   render: ->
     fub.puts 1, 'collection view', 'render'
