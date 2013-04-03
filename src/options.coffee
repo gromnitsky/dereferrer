@@ -190,6 +190,16 @@ root.RefrefsView = Backbone.View.extend {
         self.collection.reset model_data
       .done()
 
+    # a hack to force TrafficController object to reread all data from
+    # the storage; this is necessary because callback in
+    # onBeforeSendHeaders listener cannot wait for promises to return
+    $('#refrefs-save').on 'click', ->
+      chrome.runtime.getBackgroundPage (bg) ->
+        bg.tc?.rulesGet()
+        .then (model_data) ->
+          console.log model_data if fub.VERBOSE
+        .done()
+
   render: ->
     fub.puts 1, 'collection view', 'render'
     this.$el.html @template
