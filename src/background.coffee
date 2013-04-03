@@ -24,9 +24,45 @@ class root.TrafficController
         @rulesFresh = true
         @rules = model_data
 
+  size: ->
+    Object.keys(@rules).length
+
   status: ->
-    fub.puts 0, 'traffic_controller', '%d rules: fresh: %s',
-      Object.keys(@rules).length, @rulesFresh
+    fub.puts 0, 'traffic_controller', '%d rules: fresh: %s', @size(), @rulesFresh
+
+  # headers is an array from details object from onBeforeSendHeaders
+  # listener.
+  #
+  # Return { index: 123, value: 'http://example.com' } or null.
+  @RefererFind: (headers) ->
+    return null unless headers
+
+    obj = null
+    for hdr,idx in headers
+      if hdr.name.match /^referer$/i
+        obj = {}
+        obj.index = idx
+        obj.value = hdr.value
+        break
+
+    obj
+
+  # Delete header if value is an empty string or null.
+  @RefererSet: (webRequest, value) ->
+    return unless webRequest?.requestHeaders
+    ref = @RefererFind webRequest.requestHeaders
+    value = value.replace /\s*/g, ''
+
+    if value
+      if ref
+        webRequest.requestHeaders[ref.index] = value
+      else
+        webRequest.requestHeaders.push {
+          name: 'Referer'
+          value: value
+        }
+    else
+      webRequest.requestHeaders.splice ref.index, 1 if ref
 
 
 # main
@@ -45,5 +81,4 @@ storage.getSize()
   root.tc.rulesGet()
 .then (model_data) ->
   root.tc.status()
-  console.log model_data
 .done()
