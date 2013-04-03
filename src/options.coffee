@@ -188,6 +188,9 @@ root.RefrefsView = Backbone.View.extend {
         storage.load()
       .then (model_data) ->
         self.collection.reset model_data
+
+        notifyBackgroung()
+        $('#refrefs-save').trigger 'click'
       .done()
 
     # a hack to force TrafficController object to reread all data from
