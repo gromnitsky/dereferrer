@@ -114,7 +114,14 @@ root.RefrefView = Backbone.View.extend {
 
   render: ->
     fub.puts 1, 'model view', 'render: %s', @model.id
-    this.$el.html @template()
+
+    if this.$('.refref-destroy').length == 0
+      this.$el.html @template()
+    else
+      # don't redraw the whole thing to preserves focus
+      this.$('.refref-domain-edit').value = @model.get('domain')
+      this.$('.refref-referer-edit').value = @model.get('referer')
+
     this
 
   # save changes in model from a gui element
