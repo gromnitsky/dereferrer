@@ -9,6 +9,9 @@
 	},
 	"options_page": "lib/options.html",
 	"permissions": [
-		"storage"
+		"storage",
+		"webRequest",
+		"webRequestBlocking",
+		"<all_urls>"
 	]
 }

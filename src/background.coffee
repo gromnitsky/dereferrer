@@ -32,6 +32,11 @@ class root.TrafficController
 # main
 root.tc = new root.TrafficController()
 
+# hook into chrome's http request
+chrome.webRequest.onBeforeSendHeaders.addListener (details) ->
+  console.log details.requestHeaders
+, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders']
+
 storage.getSize()
 .then (bytes) ->
   fub.puts 1, 'storage', '%s bytes', bytes
