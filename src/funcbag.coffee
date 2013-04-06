@@ -1,10 +1,12 @@
 exports.VERBOSE = 1
+exports.INSTALL_TYPE = 'development'
 
 exports.puts = (level, who) ->
   arguments[2] = "#{who}: #{arguments[2]}" if arguments?.length > 2 && who != ""
   msg = (val for val, idx in arguments when idx > 1)
   console.log.apply(console, msg) if level <= exports.VERBOSE
 
+# From stackoverflow so it must be solid.
 exports.uuid = ->
   buf = new Uint16Array(8)
   window.crypto.getRandomValues buf
@@ -14,6 +16,19 @@ exports.uuid = ->
     ret
 
   (S4(buf[0])+S4(buf[1])+"-"+S4(buf[2])+"-4"+S4(buf[3]).substring(1)+"-y"+S4(buf[4]).substring(1)+"-"+S4(buf[5])+S4(buf[6])+S4(buf[7]))
+
+# Return a string or null on error.
+exports.readFile = (file) ->
+  content = null
+  fp = new XMLHttpRequest()
+  try
+    fp.open "GET", file, false
+    fp.send null
+    content = fp.responseText
+  catch e
+    exports.puts 0, 'readFile', 'cannot load %s: %s', file, e.message
+
+  content
 
 exports.domFlash = (element, funcall) ->
   oldcolor = element.style.backgroundColor
@@ -25,3 +40,10 @@ exports.domFlash = (element, funcall) ->
     throw e
   finally
     element.style.backgroundColor = oldcolor
+
+
+# In a packed extension, there is no Makefile. Thus we can distinguish
+# whether we are in a 'developer' mode or in a usual installation.
+if !exports.readFile '../Makefile'
+  exports.VERBOSE = 0
+  exports.INSTALL_TYPE = 'other'

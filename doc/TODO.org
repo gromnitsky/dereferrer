@@ -4,6 +4,9 @@
 - [X] domainzone
 - [X] mock chrome storage
 - [X] jasmine tests for options.coffee
-- [ ] find template library that works in chrome extensions
-- [ ] move to storage.sync instead of storage.local
 - [X] background.coffee
+- [ ] find template library that works in chrome extensions
+- [ ] update readme
+- [ ] make a model for TrafficController#rulesFresh & a view for
+  it in options.html as a Save button
+- [ ] tests for storage failure

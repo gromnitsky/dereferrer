@@ -3,7 +3,7 @@
 Q = require 'q'
 
 fub = require './funcbag'
-chmst = new (require './chrome_storage')()
+chmst = new (require './chrome_storage')(fub.INSTALL_TYPE == 'development')
 
 # For having not only Refref models in the storage. Reserved for the
 # future. For example, __options__
