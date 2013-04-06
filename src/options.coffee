@@ -51,6 +51,8 @@ root.Refref = Backbone.Model.extend {
           notifyBackgroung()
         , (e) ->
           fub.puts 0, 'SYNC', '%s: %s: FAIL: %s', model.id, method, e.message
+          alert "Saving error: #{e.message}"
+          throw e
         .done()
 
       when 'read'
@@ -64,6 +66,8 @@ root.Refref = Backbone.Model.extend {
           notifyBackgroung()
         , (e) ->
           fub.puts 0, 'SYNC', '%s: %s: FAIL: %s', model.id, method, e.message
+          alert "Deleting error: #{e.message}"
+          throw e
         .done()
 
   validate: (attrs, options) ->
@@ -231,6 +235,10 @@ root.startHere = ->
     refrefs = new root.Refrefs()
     refrefs_table = new root.RefrefsView({collection: refrefs})
     refrefs.reset model_data
+  .fail (e) ->
+    fub.puts 0, 'startHere', 'error: %s', e.message
+    alert "Error loading models: #{e.message}\n\nClick OK & press F12 for more info."
+    throw e
   .done()
 
 

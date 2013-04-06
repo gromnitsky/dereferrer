@@ -5,8 +5,13 @@
 - [X] mock chrome storage
 - [X] jasmine tests for options.coffee
 - [X] background.coffee
+- [X] tests for storage failure
 - [ ] find template library that works in chrome extensions
 - [ ] update readme
+
+* unsure
+
 - [ ] make a model for TrafficController#rulesFresh & a view for
   it in options.html as a Save button
-- [ ] tests for storage failure
+- [ ] make a model for current status' and use it for displaying
+  errors instead of alert()

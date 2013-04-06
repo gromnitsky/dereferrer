@@ -67,6 +67,18 @@ describe("Modifying refrefs", function() {
 	})
 })
 
+describe("fail to modify due to a storage error", function() {
+	it("alerts user", function() {
+		var domain = $('#refrefs tr:last input:first')
+		domain.get(0).value = "12345, vyshel zaychik poguliat'"
+
+		chrome.runtime.lastError = new Error('whoa')
+		domain.trigger('change')
+		expect(window.alert.calls.length).toEqual(2)
+		chrome.runtime.lastError = undefined
+	})
+})
+
 describe("Reset", function() {
 	it("resets to defaults", function() {
 		spyOn(window, 'confirm').andReturn(true)
