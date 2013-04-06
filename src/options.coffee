@@ -5,6 +5,7 @@ root = if isBrowserify() then getGlobal() else exports ? getGlobal()
 
 $ = require '../vendor/zepto.shim'
 Backbone = require 'backbone'
+Mustache = require 'mustache'
 
 fub = require './funcbag'
 DomainZone = require './domainzone'
@@ -107,12 +108,13 @@ root.RefrefView = Backbone.View.extend {
     @model.view = this
     @listenTo @model, 'change', @render
 
-  # can't use _.template() due to chrome policy that is too long to
-  # describe here. TODO: find a nice templating library
+  # We can't use _.template() due to chrome policy that is too long to
+  # describe here.
   template: ->
-    "<td class='refref-destroy'>&empty;</td>
-<td class='refref-domain-edit'><input value='#{@model.get('domain')}'></td>
-<td class='refref-referer-edit'><input value='#{@model.get('referer')}'></td>"
+    Mustache.render "<td class='refref-destroy'>&empty;</td>\
+      <td class='refref-domain-edit'><input value='{{domain}}'></td>\
+      <td class='refref-referer-edit'><input value='{{referer}}'></td>"
+    , {domain: @model.get('domain'), referer: @model.get('referer')}
 
   render: ->
     fub.puts 1, 'model view', 'render: %s', @model.id

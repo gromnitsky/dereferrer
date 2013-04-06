@@ -6,7 +6,7 @@
 - [X] jasmine tests for options.coffee
 - [X] background.coffee
 - [X] tests for storage failure
-- [ ] find template library that works in chrome extensions
+- [X] find template library that works in chrome extensions
 - [ ] update readme
 
 * unsure
