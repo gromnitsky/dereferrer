@@ -13,7 +13,7 @@ class root.TrafficController
 
   constructor: ->
     @rulesFresh = false
-    @rules = {}
+    @rules = []
 
   # Return a promise.
   rulesGet: ->
@@ -65,16 +65,27 @@ class root.TrafficController
     else
       webRequest.requestHeaders.splice ref.index, 1 if ref
 
+  domainMatch: (url) ->
+    return null unless url
+    (return idx if DomainZone.Match(idx.domain, url)) for idx in @rules
+    null
+
   requestModify: (webRequest) ->
     return {} unless webRequest?.requestHeaders
 
-    for idx in @rules
-      if DomainZone.Match idx.domain, webRequest.url
-        root.TrafficController.RefererSet webRequest, idx.referer
-        fub.puts 1, 'onBeforeSendHeaders', '%s: %s', webRequest.url, idx.referer
-        break
+    dz = @domainMatch webRequest.url
+    if dz
+      root.TrafficController.RefererSet webRequest, dz.referer
+      fub.puts 1, 'onBeforeSendHeaders', '%s: %s', webRequest.url, dz.referer
 
     {requestHeaders: webRequest.requestHeaders}
+
+showIcon = (tabId, changeInfo, tab) ->
+  return unless changeInfo.status == 'complete'
+  dz = root.tc.domainMatch tab.url
+  if dz
+    chrome.pageAction.show(tabId)
+    chrome.pageAction.setTitle {tabId: tabId, title: "Referer: #{dz.referer}"}
 
 
 # main
@@ -84,6 +95,9 @@ root.tc = new root.TrafficController()
 chrome.webRequest.onBeforeSendHeaders.addListener (details) ->
   tc.requestModify details
 , { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders']
+
+# listen for any changes to the url of any tab
+chrome.tabs.onUpdated.addListener showIcon
 
 storage.getSize()
 .then (bytes) ->
