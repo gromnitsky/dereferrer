@@ -10,8 +10,6 @@ fub = require './funcbag'
 DomainZone = require './domainzone'
 storage = require './storage'
 
-isUnderTests = -> jasmine?
-
 # Tell bg page to refresh refrefs.
 notifyBackgroung = ->
   chrome.runtime.getBackgroundPage (bg) -> bg.tc?.rulesFresh = false
@@ -238,4 +236,4 @@ root.startHere = ->
 
 # main
 $ ->
-  root.startHere() unless isUnderTests()
+  root.startHere() unless fub.isUnderTests()

@@ -26,7 +26,7 @@ exports.readFile = (file) ->
     fp.send null
     content = fp.responseText
   catch e
-    exports.puts 0, 'readFile', 'cannot load %s: %s', file, e.message
+    exports.puts 0, 'readFile', 'cannot load %s: %s', file, e
 
   content
 
@@ -42,8 +42,11 @@ exports.domFlash = (element, funcall) ->
     element.style.backgroundColor = oldcolor
 
 
+exports.isUnderTests = -> jasmine? || suiteSetup?
+
+
 # In a packed extension, there is no Makefile. Thus we can distinguish
 # whether we are in a 'developer' mode or in a usual installation.
-if !exports.readFile '../Makefile'
+if !exports.isUnderTests() && !exports.readFile '../Makefile'
   exports.VERBOSE = 0
   exports.INSTALL_TYPE = 'other'
