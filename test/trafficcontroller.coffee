@@ -5,9 +5,13 @@ require './chrome_storage_mock'
 chrome.webRequest = {
   onBeforeSendHeaders: {
     addListener: (details) ->
-      # boo
+      # beep
   }
 }
+chrome.tabs =
+  onUpdated:
+    addListener: ->
+      # boop
 
 fub = require '../src/funcbag'
 bg = require '../src/background'
