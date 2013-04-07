@@ -1,8 +1,26 @@
 # dereferrer
 
-Chrome 25+ extension.
+Chrome 26+ extension.
 
-TODO: write a description
+Does [referer spoofing](http://en.wikipedia.org/wiki/Referer_spoofing)
+for a selected list of (sub)domains.
+
+## Features
+
+* Replacing/deleting HTTP `referer` header.
+* A very straiforward domain matching (no regexps, just natural to users
+  `example.com` or `foo.example.net` strings).
+* Auto-sync preferences for signed users.
+
+![options page](https://raw.github.com/gromnitsky/dereferrer/master/doc/ss-options.png)
+
+## Download & Install
+
+For a latest .crx file look
+[here](http://gromnitsky.users.sourceforge.net/js/chrome/).
+
+Save the file, then open Chrome's extensions page (`Alt-F`
+`Tools->Extensions`) and drag & drop the file into the page.
 
 ## Build requirements:
 
@@ -33,3 +51,5 @@ appear.
 ## License
 
 MIT.
+
+The icon is from [openclipart](http://openclipart.org/detail/24798/-by--24798).
