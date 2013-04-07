@@ -1,5 +1,7 @@
 {
 	"files": [
+		"icons/128.png",
+		"icons/19.png",
 		"lib/background.js",
 		"lib/options.js",
 		"lib/options.html",

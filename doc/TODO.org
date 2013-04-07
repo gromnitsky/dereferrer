@@ -1,14 +1,3 @@
-* 0.0.1
-
-- [X] reset button
-- [X] domainzone
-- [X] mock chrome storage
-- [X] jasmine tests for options.coffee
-- [X] background.coffee
-- [X] tests for storage failure
-- [X] find template library that works in chrome extensions
-- [ ] update readme
-
 * unsure
 
 - [ ] make a model for TrafficController#rulesFresh & a view for

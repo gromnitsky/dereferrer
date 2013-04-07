@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "dereferrer",
-	"description": "TODO: add a description",
+	"description": "Referer spoofing",
 	"version": "syscmd(`json < package.json version | tr -d \\n')",
 	"icons": {
 		"128": "icons/128.png"
