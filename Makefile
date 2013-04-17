@@ -8,15 +8,18 @@ PKG_FILES := $(shell $(JSON) files < $(METADATA) | $(JSON) -a)
 
 OPTS :=
 
-.PHONY: clobber clean manifest_clean compile_clean
+.PHONY: clobber clean manifest_clean compile_clean depend
 
 all: test
 
 test: compile
 	$(MOCHA) --compilers coffee:coffee-script -u tdd test $(OPTS)
 
+depend:
+	$(MAKE) -C src $@
+
 compile: node_modules manifest.json
-	$(MAKE) -C src compile
+	$(MAKE) -C src $@
 
 include chrome.mk
 

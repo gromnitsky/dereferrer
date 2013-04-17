@@ -24,7 +24,7 @@ Save the file, then open Chrome's extensions page (`Alt-F`
 
 ## Build requirements:
 
-* jsontool in global mode.
+* jsontool & make-commonjs-depend in global mode.
 * GNU m4
 * xxd utility.
 * GNU make.
@@ -33,6 +33,7 @@ Save the file, then open Chrome's extensions page (`Alt-F`
 
 To compile, run
 
+    $ make depend
     $ make compile
 
 To make a .crx file, you'll need a private RSA key named `private.pem`
