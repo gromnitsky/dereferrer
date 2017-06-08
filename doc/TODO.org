@@ -1,6 +1,0 @@
-* unsure
-
-- [ ] make a model for TrafficController#rulesFresh & a view for
-  it in options.html as a Save button
-- [ ] make a model for current status' and use it for displaying
-  errors instead of alert()

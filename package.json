@@ -1,29 +1,18 @@
 {
-	"files": [
-		"icons/128.png",
-		"icons/19.png",
-		"lib/background.js",
-		"lib/options.js",
-		"lib/options.html",
-		"manifest.json"
-	],
-	"name": "dereferrer",
-	"version": "0.0.1",
-	"license": {
-		"type": "MIT",
-		"url": "http://www.opensource.org/licenses/mit-license.php"
-	},
-	"repository": {
-		"type": "git",
-		"url": "http://github.com/gromnitsky/dereferrer"
-	},
-	"dependencies": {
-		"coffee-script": "~1.6.2",
-		"mocha": "~1.8.2",
-		"underscore": "~1.4.4",
-		"backbone": "~1.0.0",
-		"browserify": "~2.6.0",
-		"q": "~0.8.12",
-		"mustache": "~0.7.2"
-	}
+    "private": true,
+    "name": "see-manifest.json",
+    "version": "0.0.1-see-manifest.json",
+    "license": "MIT",
+    "repository": {
+	"type": "git",
+	"url": "http://github.com/gromnitsky/dereferrer"
+    },
+    "dependencies": {
+	"coffee-script": "1.6.2",
+	"mocha": "1.8.2",
+	"underscore": "1.4.4",
+	"backbone": "1.0.0",
+	"q": "0.8.12",
+	"mustache": "0.7.2"
+    }
 }

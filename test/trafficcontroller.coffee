@@ -109,5 +109,5 @@ suite 'TrafficController', ->
   test 'requestModify', ->
     @webrequest2.url = 'http://online.wsj.com/article/123.html'
     result = bg.tc.requestModify @webrequest2
-    assert.deepEqual {"index":4,"value":"http://news.google.com"},
+    assert.deepEqual {"index":4,"value":"https://www.facebook.com"},
       bg.TrafficController.RefererFind(result.requestHeaders)

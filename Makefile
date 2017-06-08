@@ -1,48 +1,106 @@
-M4 := m4
-JSON := json
-MOCHA := node_modules/.bin/mocha
+.DELETE_ON_ERROR:
 
-METADATA := package.json
-PKG := $(shell $(JSON) -a -d- name version < $(METADATA))
-PKG_FILES := $(shell $(JSON) files < $(METADATA) | $(JSON) -a)
+.PHONY: compile
+compile:
 
-OPTS :=
+pkg.name := $(shell json -e 'this.q = this.name + "-" + this.version' q < manifest.json)
+out := _build
+cache := $(out)/.cache
+ext := $(out)/ext
 
-.PHONY: clobber clean manifest_clean compile_clean depend
+mkdir = @mkdir -p $(dir $@)
+copy = cp $< $@
 
-all: test
-
-test: compile
-	$(MOCHA) --compilers coffee:coffee-script -u tdd test $(OPTS)
-
-depend:
-	$(MAKE) -C src $@
-
-compile: node_modules manifest.json
-	$(MAKE) -C src $@
-
-include chrome.mk
-
-compile_clean:
-	$(MAKE) -C src clean
+define compile-push
+compile: $(1)
+compile.all += $(1)
+endef
 
 node_modules: package.json
-	npm install
+	npm i
 	touch $@
 
-manifest.json: manifest.m4 $(METADATA)
-	$(M4) $< > $@
+$(eval $(call compile-push, node_modules))
 
-manifest_clean:
-	rm -f manifest.json
+
 
-clean: manifest_clean compile_clean chrome_clean
-	[ -r lib ] && rmdir lib; :
+coffee.src := $(wildcard src/*.coffee)
+coffee.dest := $(patsubst src/%.coffee, $(cache)/%.js, $(coffee.src))
 
-clobber: clean
-	rm -rf node_modules
+$(cache)/%.js: src/%.coffee
+	$(mkdir)
+	node_modules/.bin/coffee -c -o $(dir $@) $<
 
-# Debug. Use 'gmake p-obj' to print $(obj) variable.
-p-%:
-	@echo $* = $($*)
-	@echo $*\'s origin is $(origin $*)
+$(eval $(call compile-push, $(coffee.dest)))
+
+
+
+vendor.src := $(wildcard vendor/*)
+vendor.dest := $(addprefix $(out)/, $(vendor.src))
+
+$(vendor.dest): $(out)/%: %
+	$(mkdir)
+	$(copy)
+
+$(eval $(call compile-push, $(vendor.dest)))
+
+$(ext)/options.html: src/options.html
+	$(mkdir)
+	$(copy)
+
+$(eval $(call compile-push, $(ext)/options.html))
+
+static.src := $(wildcard icons/* manifest.json)
+static.dest := $(addprefix $(ext)/, $(static.src))
+
+$(static.dest): $(ext)/%: %
+	$(mkdir)
+	$(copy)
+
+$(eval $(call compile-push, $(static.dest)))
+
+
+
+bundles.src := $(cache)/background.js $(cache)/options.js
+bundles.dest := $(patsubst $(cache)/%, $(ext)/%, $(bundles.src))
+
+-include $(bundles.src:.js=.d)
+
+define make-depend
+@echo Generating $(basename $<).d
+@printf '%s: ' $@ > $(basename $<).d
+@browserify --no-bundle-external --list $< \
+        | sed s,$(CURDIR)/,, | sed s,$<,, | tr '\n' ' ' \
+        >> $(basename $<).d
+endef
+
+$(bundles.dest): $(ext)/%: $(cache)/%
+	browserify $< -o $@
+	$(make-depend)
+
+$(eval $(call compile-push, $(bundles.dest)))
+
+
+
+# crx generation
+.PHONY: crx
+crx: $(out)/$(pkg.name).crx
+
+$(out)/$(pkg.name).zip: $(compile.all)
+	$(mkdir)
+	cd $(dir $<) && zip -qr $(CURDIR)/$@ *
+
+%.crx: %.zip private.pem
+	./zip2crx $< private.pem
+
+# sf
+
+.PHONY: upload
+upload:
+	scp $(out)/$(pkg.name).crx gromnitsky@web.sourceforge.net:/home/user-web/gromnitsky/htdocs/js/chrome/
+
+
+
+.PHONY: test
+test:
+	node_modules/.bin/mocha --compilers coffee:coffee-script -u tdd test

@@ -23,10 +23,10 @@ chmst.setDefaults = ->
   everybody_wants_this =
     '1':
       domain: 'wsj.com'
-      referer: 'http://news.google.com'
+      referer: 'https://www.facebook.com'
     '2':
       domain: 'ft.com'
-      referer: 'http://news.google.com'
+      referer: 'https://news.google.com'
 
   @clean()
   .then =>
