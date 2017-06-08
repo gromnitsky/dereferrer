@@ -1,50 +1,49 @@
 <!DOCTYPE html>
 <html>
   <head>
-	<title>dereferrer options</title>
-	<script src="options.js"></script>
-	<style type="text/css">
-/*	  table {
-      border-collapse: collapse
+    <title>dereferrer options</title>
+    <script src="options.js"></script>
+    <style type="text/css">
+      body {
+        max-width: 600px;
+        margin: 0 auto;
       }
-      th, td {
-      border: 1px solid black;
-      padding: 3px;
-      }*/
-	  #refrefs-controls {
-	  margin-top: 25px;
-	  }
+      input { width: 95%; }
+      table { width: 100%; }
+      td { text-align: center; }
+      #refrefs-controls { margin-top: 1em; }
       .refref-destroy { cursor: pointer; }
-	</style>
+    </style>
   </head>
 
   <body>
 
-	<div id='list'>
-	  <!-- <h2>Yo!</h2> -->
-	  <table>
-		<tbody id='refrefs'>
-		  <!-- guess what goes here -->
-		</tbody>
-	  </table>
-	  <div id='refrefs-controls'>
-		<button id='refrefs-add'>Add</button>
-		<button id='refrefs-save'>Save</button>
-		<button id='refrefs-reset' title="To extension's defaults">Reset</button>
-	  </div>
-	</div>
+    <div id='list'>
+      <table>
+	<tbody id='refrefs'>
+	  <!-- guess what goes here -->
+	</tbody>
+      </table>
+      <div id='refrefs-controls'>
+	<button id='refrefs-add'>Add</button>
+	<button id='refrefs-save'>Save</button>
+	<button id='refrefs-reset' title="To extension's defaults">Reset</button>
+      </div>
+    </div>
 
-	<div id='help'>
-	  <p>
-		If a domain match was successful, an icon in a corresponding
-		tab's omnibox will appear later on. Empty <tt>referer</tt> means
-		that header will be removed.
-	  </p>
-	  <p>
-		<i>Hint:</i> some pay-walls (ft.com) also track number of visits
-		via cookies.
-	  </p>
-	</div>
+    <div id='help'>
+      <p>
+	If a domain match has been successful, an icon
+	<img src='icons/19.png'>
+	in the Google Chrome toolbar will become "active". An
+	empty <code>referrer</code> means that the header will be
+	removed.
+      </p>
+      <p>
+	<i>A hint:</i> some pay-walls (<code>ft.com</code>) also track
+	the total number of free visits via cookies.
+      </p>
+    </div>
 
   </body>
 </html>
