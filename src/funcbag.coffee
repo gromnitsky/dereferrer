@@ -45,8 +45,8 @@ exports.domFlash = (element, funcall) ->
 exports.isUnderTests = -> jasmine? || suiteSetup?
 
 
-# In a packed extension, there is no Makefile. Thus we can distinguish
+# In a packed extension, there is no 'debug.txt'. Thus we can distinguish
 # whether we are in a 'developer' mode or in a usual installation.
-if !exports.isUnderTests() && !exports.readFile '../Makefile'
+if !exports.isUnderTests() && !exports.readFile 'debug.txt'
   exports.VERBOSE = 0
   exports.INSTALL_TYPE = 'other'

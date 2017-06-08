@@ -47,6 +47,7 @@ $(eval $(call compile-push, $(vendor.dest)))
 $(ext)/options.html: src/options.html
 	$(mkdir)
 	$(copy)
+	echo $@ > $(dir $@)/debug.txt
 
 $(eval $(call compile-push, $(ext)/options.html))
 
@@ -90,7 +91,7 @@ crx: $(out)/$(pkg.name).crx
 
 $(out)/$(pkg.name).zip: $(compile.all)
 	$(mkdir)
-	cd $(dir $<) && zip -qr $(CURDIR)/$@ *
+	cd $(ext) && zip -x debug.txt -qr $(CURDIR)/$@ *
 
 %.crx: %.zip private.pem
 	./zip2crx $< private.pem
