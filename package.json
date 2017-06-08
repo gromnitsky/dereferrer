@@ -13,6 +13,7 @@
 	"underscore": "1.4.4",
 	"backbone": "1.0.0",
 	"q": "0.8.12",
-	"mustache": "0.7.2"
+	"mustache": "0.7.2",
+	"browserify": "2.6.0"
     }
 }

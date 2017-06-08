@@ -66,6 +66,7 @@ bundles.dest := $(patsubst $(cache)/%, $(ext)/%, $(bundles.src))
 
 -include $(bundles.src:.js=.d)
 
+# browserify 14.4.0
 define make-depend
 @echo Generating $(basename $<).d
 @printf '%s: ' $@ > $(basename $<).d
@@ -74,8 +75,9 @@ define make-depend
         >> $(basename $<).d
 endef
 
+# only works w/ browserify 2.6.0, hahaha
 $(bundles.dest): $(ext)/%: $(cache)/%
-	browserify $< -o $@
+	node_modules/.bin/browserify $< -o $@
 	$(make-depend)
 
 $(eval $(call compile-push, $(bundles.dest)))
